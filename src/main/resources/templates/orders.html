@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head('Đơn Hàng Của Tôi - SneakPeak')}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Navbar -->
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <div class="container my-4 flex-grow-1">
+        <!-- Thông báo lỗi nếu có -->
+        <div th:if="${errorMessage != null}" class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-bag-check text-warning"></i> Đơn Hàng Của Tôi
+                </h3>
+                <p class="text-muted small mb-0">Theo dõi trạng thái và lịch sử tất cả các đơn đặt hàng của bạn.</p>
+            </div>
+            <a th:href="@{/}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                <i class="bi bi-shop me-1"></i> Mua sắm thêm
+            </a>
+        </div>
+
+        <!-- TRƯỜNG HỢP CHƯA CÓ ĐƠN HÀNG NÀO -->
+        <div th:if="${orders == null or #lists.isEmpty(orders)}" 
+             class="card border-0 shadow-sm rounded-4 p-5 text-center my-4">
+            <div class="mb-3 text-muted display-1">
+                <i class="bi bi-receipt-cutoff"></i>
+            </div>
+            <h4 class="fw-bold text-dark">Bạn chưa có đơn hàng nào!</h4>
+            <p class="text-muted">Các đơn hàng sau khi bạn đặt mua sẽ được lưu lại và hiển thị tại đây.</p>
+            <div class="mt-2">
+                <a th:href="@{/}" class="btn btn-warning px-4 py-2 fw-bold text-dark rounded-pill shadow-sm">
+                    <i class="bi bi-arrow-right me-1"></i> Khám phá sản phẩm ngay
+                </a>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH ĐƠN HÀNG -->
+        <div th:unless="${orders == null or #lists.isEmpty(orders)}" class="card border-0 shadow-sm rounded-4 p-3 p-md-4">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="table-light small text-uppercase text-secondary">
+                        <tr>
+                            <th scope="col">Mã đơn hàng</th>
+                            <th scope="col">Ngày đặt</th>
+                            <th scope="col" class="text-center">Số lượng</th>
+                            <th scope="col" class="text-end">Tổng tiền</th>
+                            <th scope="col" class="text-center">Trạng thái</th>
+                            <th scope="col" class="text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}">
+                            <!-- Mã đơn hàng -->
+                            <td>
+                                <strong class="text-primary" th:text="${order.orderCode}">SP-ABC123</strong>
+                                <div class="text-muted small" th:text="${order.paymentMethod == 'COD' ? 'Thanh toán COD' : 'Chuyển khoản'}">COD</div>
+                            </td>
+
+                            <!-- Ngày đặt -->
+                            <td class="text-secondary small" 
+                                th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                01/01/2026 10:00
+                            </td>
+
+                            <!-- Số lượng -->
+                            <td class="text-center fw-semibold text-secondary">
+                                <span th:text="${order.totalQuantity} + ' đôi'">0 đôi</span>
+                            </td>
+
+                            <!-- Tổng tiền -->
+                            <td class="text-end fw-bold text-danger">
+                                <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</span>
+                            </td>
+
+                            <!-- Badge trạng thái -->
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-2 fw-semibold" 
+                                      th:classappend="${order.status.badgeClass}" 
+                                      th:text="${order.status.displayName}">Chờ xác nhận</span>
+                            </td>
+
+                            <!-- Xem chi tiết -->
+                            <td class="text-center">
+                                <a th:href="@{/orders/{id}(id=${order.id})}" 
+                                   class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                                    <i class="bi bi-eye me-1"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

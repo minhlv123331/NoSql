@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head(${shoe.name} + ' - SneakPeak')}">
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <div class="container my-4">
+        <!-- Thông báo lỗi hoặc thành công nếu có -->
+        <div th:if="${errorMessage != null}" class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${successMessage != null}" class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Breadcrumb điều hướng -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/(brand=${shoe.brand})}" class="text-decoration-none" th:text="${shoe.brand}">Thương hiệu</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/(category=${shoe.category})}" class="text-decoration-none" th:text="${shoe.category}">Danh mục</a></li>
+                <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 300px;" th:text="${shoe.name}">Tên giày</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden p-4 bg-white">
+            <div class="row g-5">
+                <!-- CỘT TRÁI: ẢNH SẢN PHẨM -->
+                <div class="col-lg-6">
+                    <div class="position-relative text-center bg-light rounded-4 p-3 border">
+                        <img th:src="${shoe.imageUrl}" id="mainShoeImage" class="img-fluid rounded-3" 
+                             style="max-height: 480px; width: 100%; object-fit: contain;" 
+                             th:alt="${shoe.name}"
+                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80';">
+                        
+                        <span th:if="${shoe.isOutOfStock()}" 
+                              class="position-absolute top-0 start-0 m-3 badge bg-danger fs-6 px-3 py-2 shadow-sm">
+                            HẾT HÀNG
+                        </span>
+                    </div>
+
+                    <!-- Cam kết dịch vụ nhanh -->
+                    <div class="row g-3 mt-3 text-center">
+                        <div class="col-4">
+                            <div class="p-2 border rounded-3 bg-light">
+                                <i class="bi bi-patch-check text-primary fs-4"></i>
+                                <div class="small fw-semibold mt-1">100% Chính Hãng</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded-3 bg-light">
+                                <i class="bi bi-arrow-repeat text-success fs-4"></i>
+                                <div class="small fw-semibold mt-1">Đổi size 30 ngày</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded-3 bg-light">
+                                <i class="bi bi-truck text-warning fs-4"></i>
+                                <div class="small fw-semibold mt-1">Freeship toàn quốc</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI: THÔNG TIN CHI TIẾT & CHỌN SIZE/MÀU -->
+                <div class="col-lg-6 d-flex flex-column">
+                    <div class="mb-2">
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis px-3 py-2 fw-semibold fs-6" 
+                              th:text="${shoe.brand}">Hãng</span>
+                        <span class="badge bg-dark-subtle text-dark-emphasis px-3 py-2 fw-semibold fs-6 ms-1" 
+                              th:text="${shoe.category}">Danh mục</span>
+                    </div>
+
+                    <h1 class="h2 fw-bold text-dark mb-3" th:text="${shoe.name}">Tên sản phẩm</h1>
+
+                    <!-- Giá bán -->
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <span class="text-danger fw-bold fs-2" 
+                              th:text="${#numbers.formatDecimal(shoe.price, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                            0 đ
+                        </span>
+                        <span class="text-muted small ms-2">(Đã bao gồm VAT)</span>
+                    </div>
+
+                    <!-- Mô tả sản phẩm -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-secondary text-uppercase small">Mô Tả Sản Phẩm</h6>
+                        <p class="text-muted" th:text="${shoe.description}">Mô tả chi tiết về mẫu giày...</p>
+                    </div>
+
+                    <hr class="my-3 text-secondary opacity-25">
+
+                    <!-- Form Thêm vào giỏ hàng -->
+                    <form th:action="@{/cart/add}" method="post" id="addToCartForm" class="d-flex flex-column flex-grow-1">
+                        <!-- Hidden inputs -->
+                        <input type="hidden" name="shoeId" th:value="${shoe.id}">
+                        <input type="hidden" name="color" id="selectedColorInput" value="">
+
+                        <!-- Bộ chọn Size & Biến thể -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="fw-bold small text-secondary text-uppercase">Chọn Kích Cỡ (Size):</label>
+                                <span id="stockStatusText" class="small fw-semibold text-primary">
+                                    Tổng tồn kho: <span th:text="${totalStock}">0</span> đôi
+                                </span>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2" id="variantContainer">
+                                <div th:each="v, stat : ${variants}" class="variant-option">
+                                    <!-- Size còn hàng -->
+                                    <input th:if="${v.stock > 0}" 
+                                           type="radio" 
+                                           class="btn-check size-radio" 
+                                           name="size" 
+                                           th:id="'var_' + ${stat.index}" 
+                                           th:value="${v.size}"
+                                           th:data-stock="${v.stock}"
+                                           th:data-color="${v.color}"
+                                           autocomplete="off"
+                                           th:checked="${stat.first && v.stock > 0}"
+                                           required>
+                                    <label th:if="${v.stock > 0}" 
+                                           class="btn btn-outline-dark px-3 py-2 rounded-3" 
+                                           th:for="'var_' + ${stat.index}">
+                                        <span class="fw-bold" th:text="${v.size}">40</span>
+                                        <small class="d-block text-muted" style="font-size: 0.65rem;" th:text="${v.color}">Trắng</small>
+                                    </label>
+
+                                    <!-- Size hết hàng: disable và gạch ngang -->
+                                    <input th:if="${v.stock == 0}" 
+                                           type="radio" 
+                                           class="btn-check" 
+                                           th:id="'var_' + ${stat.index}" 
+                                           disabled 
+                                           autocomplete="off">
+                                    <label th:if="${v.stock == 0}" 
+                                           class="btn btn-outline-secondary px-3 py-2 rounded-3 opacity-50 position-relative" 
+                                           th:for="'var_' + ${stat.index}" 
+                                           style="text-decoration: line-through;" 
+                                           title="Hết hàng">
+                                        <span class="fw-bold" th:text="${v.size}">40</span>
+                                        <small class="d-block text-danger" style="font-size: 0.65rem;">Hết</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="selectedVariantInfo" class="mt-2 text-muted small fst-italic">
+                                <!-- JS sẽ cập nhật thông tin size và màu sắc khi bấm chọn -->
+                            </div>
+                        </div>
+
+                        <!-- Chọn số lượng & Nút Thêm vào giỏ -->
+                        <div class="mt-auto">
+                            <div class="row g-3 align-items-center mb-3">
+                                <div class="col-auto">
+                                    <label class="fw-bold small text-secondary">Số lượng:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="input-group" style="width: 130px;">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnMinus">-</button>
+                                        <input type="number" name="quantity" id="inputQuantity" class="form-control text-center" value="1" min="1" max="10">
+                                        <button class="btn btn-outline-secondary" type="button" id="btnPlus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-3">
+                                <button th:if="${!shoe.isOutOfStock()}" type="submit" 
+                                        class="btn btn-warning btn-lg flex-grow-1 fw-bold py-3 shadow-sm rounded-3" id="btnAddToCart">
+                                    <i class="bi bi-cart-plus me-2 fs-5"></i> THÊM VÀO GIỎ HÀNG
+                                </button>
+                                <button th:if="${shoe.isOutOfStock()}" type="button" disabled
+                                        class="btn btn-secondary btn-lg flex-grow-1 fw-bold py-3 rounded-3">
+                                    <i class="bi bi-x-circle me-2 fs-5"></i> TẠM HẾT HÀNG
+                                </button>
+                                <a th:href="@{/}" class="btn btn-outline-secondary btn-lg px-4 rounded-3 d-flex align-items-center">
+                                    <i class="bi bi-arrow-left"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script tương tác chọn size và cập nhật tồn kho -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sizeRadios = document.querySelectorAll('.size-radio');
+            const stockStatusText = document.getElementById('stockStatusText');
+            const selectedVariantInfo = document.getElementById('selectedVariantInfo');
+            const selectedColorInput = document.getElementById('selectedColorInput');
+            const inputQuantity = document.getElementById('inputQuantity');
+            const btnMinus = document.getElementById('btnMinus');
+            const btnPlus = document.getElementById('btnPlus');
+
+            function updateStockDisplay(radio) {
+                if (!radio) return;
+                const size = radio.value;
+                const stock = parseInt(radio.getAttribute('data-stock'), 10) || 0;
+                const color = radio.getAttribute('data-color') || '';
+
+                selectedColorInput.value = color;
+                stockStatusText.innerHTML = `<span class="badge bg-success-subtle text-success-emphasis">Còn ${stock} đôi trong kho</span>`;
+                selectedVariantInfo.textContent = `Đang chọn: Size ${size} - Phối màu: ${color}`;
+                inputQuantity.max = stock;
+                if (parseInt(inputQuantity.value, 10) > stock) {
+                    inputQuantity.value = stock;
+                }
+            }
+
+            sizeRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    updateStockDisplay(this);
+                });
+                if (radio.checked) {
+                    updateStockDisplay(radio);
+                }
+            });
+
+            // Tăng giảm số lượng
+            btnMinus.addEventListener('click', function () {
+                let currentVal = parseInt(inputQuantity.value, 10) || 1;
+                if (currentVal > 1) {
+                    inputQuantity.value = currentVal - 1;
+                }
+            });
+
+            btnPlus.addEventListener('click', function () {
+                let currentVal = parseInt(inputQuantity.value, 10) || 1;
+                let maxVal = parseInt(inputQuantity.max, 10) || 99;
+                if (currentVal < maxVal) {
+                    inputQuantity.value = currentVal + 1;
+                }
+            });
+        });
+    </script>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

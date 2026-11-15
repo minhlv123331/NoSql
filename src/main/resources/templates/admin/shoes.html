@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/sidebar :: adminHead('Quản Lý Giày - SneakPeak')}">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div th:replace="~{admin/fragments/sidebar :: sidebar('shoes')}"></div>
+
+        <!-- Nội dung chính -->
+        <div class="admin-main flex-grow-1">
+            <!-- Flash alert -->
+            <div th:if="${errorMessage != null}" class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${successMessage != null}" class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <div>
+                    <h3 class="fw-bold mb-1">Quản Lý Sản Phẩm Giày</h3>
+                    <p class="text-muted small mb-0">Danh sách giày, biến thể size, số lượng kho và giá bán.</p>
+                </div>
+                <div>
+                    <a th:href="@{/admin/shoes/new}" class="btn btn-warning fw-bold text-dark rounded-pill px-4 py-2 shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> + Thêm Giày Mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- THANH TÌM KIẾM -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+                <form th:action="@{/admin/shoes}" method="get" class="row g-2 align-items-center">
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" name="keyword" th:value="${keyword}" 
+                                   class="form-control border-start-0" placeholder="Tìm theo tên giày, thương hiệu hoặc danh mục...">
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary rounded-3 flex-grow-1">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <a th:href="@{/admin/shoes}" class="btn btn-outline-secondary rounded-3" title="Đặt lại tìm kiếm">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- BẢNG DANH SÁCH GIÀY -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase text-secondary">
+                            <tr>
+                                <th scope="col" style="width: 70px;">Ảnh</th>
+                                <th scope="col">Tên giày</th>
+                                <th scope="col">Hãng</th>
+                                <th scope="col">Danh mục</th>
+                                <th scope="col" class="text-end">Đơn giá</th>
+                                <th scope="col" class="text-center">Tổng kho</th>
+                                <th scope="col">Các size</th>
+                                <th scope="col" class="text-center" style="width: 140px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(shoes)}">
+                                <td colspan="8" class="text-center py-4 text-muted">Không tìm thấy sản phẩm giày nào phù hợp.</td>
+                            </tr>
+                            <tr th:each="shoe : ${shoes}">
+                                <td>
+                                    <img th:src="${shoe.imageUrl}" class="rounded-3 border" 
+                                         style="width: 55px; height: 55px; object-fit: cover;" 
+                                         th:alt="${shoe.name}"
+                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&auto=format&fit=crop&q=60';">
+                                </td>
+                                <td>
+                                    <a th:href="@{/shoes/{id}(id=${shoe.id})}" target="_blank" 
+                                       class="fw-bold text-dark text-decoration-none d-block" 
+                                       th:text="${shoe.name}">Nike Air Force 1</a>
+                                    <span class="text-muted small" th:text="${shoe.id}">ID</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" th:text="${shoe.brand}">Nike</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${shoe.category}">Sneaker</span>
+                                </td>
+                                <td class="text-end fw-bold text-danger">
+                                    <span th:text="${#numbers.formatDecimal(shoe.price, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge" 
+                                          th:classappend="${shoe.totalStock <= 0} ? 'bg-danger' : (${shoe.totalStock <= 5} ? 'bg-warning text-dark' : 'bg-success')" 
+                                          th:text="${shoe.totalStock} + ' đôi'">0</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1" style="max-width: 180px;">
+                                        <span th:each="v : ${shoe.variants}" 
+                                              class="badge" 
+                                              th:classappend="${v.stock > 0} ? 'bg-light text-dark border' : 'bg-danger-subtle text-danger text-decoration-line-through'" 
+                                              th:title="'Tồn kho: ' + ${v.stock}" 
+                                              th:text="${v.size}">40</span>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex gap-2">
+                                        <a th:href="@{/admin/shoes/edit/{id}(id=${shoe.id})}" 
+                                           class="btn btn-outline-primary btn-sm rounded-3" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-square"></i> Sửa
+                                        </a>
+                                        <form th:action="@{/admin/shoes/delete/{id}(id=${shoe.id})}" method="post" 
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi hệ thống?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-3" title="Xóa">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Phân trang -->
+                <nav th:if="${totalPages > 1}" class="mt-4">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/shoes(page=${currentPage - 1}, keyword=${keyword})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                            th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/shoes(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/shoes(page=${currentPage + 1}, keyword=${keyword})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
