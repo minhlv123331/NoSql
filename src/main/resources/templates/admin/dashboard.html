@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/sidebar :: adminHead('Dashboard Quản Trị - SneakPeak')}">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div th:replace="~{admin/fragments/sidebar :: sidebar('dashboard')}"></div>
+
+        <!-- Nội dung chính -->
+        <div class="admin-main flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Dashboard Tổng Quan</h3>
+                    <p class="text-muted small mb-0">Thống kê dữ liệu vận hành thời gian thực từ MongoDB.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a th:href="@{/admin/shoes/new}" class="btn btn-warning fw-semibold rounded-pill px-3 shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> + Thêm Giày Mới
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4 THẺ KPI THỐNG KÊ -->
+            <div class="row g-3 mb-4">
+                <!-- 1. Doanh thu thực tế -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card stat-card p-3 bg-white h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Doanh Thu Đã Giao</span>
+                            <div class="stat-icon bg-success-subtle text-success">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-success mb-1" 
+                            th:text="${#numbers.formatDecimal(deliveredRevenue, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</h4>
+                        <div class="text-muted small">
+                            Dự kiến: <strong th:text="${#numbers.formatDecimal(expectedRevenue, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Đơn hàng -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card stat-card p-3 bg-white h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Tổng Đơn Hàng</span>
+                            <div class="stat-icon bg-primary-subtle text-primary">
+                                <i class="bi bi-bag-check-fill"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1" th:text="${totalOrders} + ' đơn'">0 đơn</h4>
+                        <div class="text-danger small fw-semibold">
+                            <i class="bi bi-clock-history"></i> <span th:text="${pendingOrders} + ' đơn chờ xác nhận'">0 đơn chờ duyệt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Sản phẩm giày -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card stat-card p-3 bg-white h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Sản Phẩm Giày</span>
+                            <div class="stat-icon bg-warning-subtle text-warning">
+                                <i class="bi bi-box-seam-fill"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1" th:text="${totalShoes} + ' mẫu'">0 mẫu</h4>
+                        <div class="text-muted small">
+                            Cảnh báo kho: <strong class="text-danger" th:text="${lowStockShoes} + ' mẫu sắp/hết hàng'">0 mẫu</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Khách hàng -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card stat-card p-3 bg-white h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small fw-bold text-uppercase">Khách Hàng</span>
+                            <div class="stat-icon bg-info-subtle text-info">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1" th:text="${totalUsers} + ' tài khoản'">0 tài khoản</h4>
+                        <div class="text-muted small">Thành viên hệ thống</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BẢNG 5 ĐƠN HÀNG MỚI NHẤT -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h5 class="fw-bold mb-0">Đơn Hàng Gần Đây</h5>
+                    <a th:href="@{/admin/orders}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        Xem tất cả đơn hàng <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small text-uppercase text-secondary">
+                            <tr>
+                                <th scope="col">Mã đơn</th>
+                                <th scope="col">Khách hàng</th>
+                                <th scope="col">Số điện thoại</th>
+                                <th scope="col">Ngày đặt</th>
+                                <th scope="col" class="text-end">Tổng tiền</th>
+                                <th scope="col" class="text-center">Trạng thái</th>
+                                <th scope="col" class="text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(recentOrders)}">
+                                <td colspan="7" class="text-center py-4 text-muted">Chưa có đơn hàng nào trong hệ thống.</td>
+                            </tr>
+                            <tr th:each="ord : ${recentOrders}">
+                                <td>
+                                    <strong class="text-primary" th:text="${ord.orderCode}">SP-ABC123</strong>
+                                </td>
+                                <td class="fw-semibold" th:text="${ord.customerName}">Khách hàng</td>
+                                <td class="text-muted small" th:text="${ord.customerPhone}">0912345678</td>
+                                <td class="text-muted small" th:text="${#temporals.format(ord.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                                <td class="text-end fw-bold text-danger">
+                                    <span th:text="${#numbers.formatDecimal(ord.totalAmount, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3 py-1 fw-semibold" 
+                                          th:classappend="${ord.status.badgeClass}" 
+                                          th:text="${ord.status.displayName}">Chờ duyệt</span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/admin/orders/{id}(id=${ord.id})}" 
+                                       class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                                        <i class="bi bi-eye"></i> Xử lý
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

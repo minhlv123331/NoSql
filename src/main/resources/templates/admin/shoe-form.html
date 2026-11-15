@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/sidebar :: adminHead(${isNew ? 'Thêm Giày Mới' : 'Chỉnh Sửa Giày'} + ' - SneakPeak')}">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div th:replace="~{admin/fragments/sidebar :: sidebar('shoes')}"></div>
+
+        <!-- Nội dung chính -->
+        <div class="admin-main flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1" th:text="${isNew ? 'Thêm Sản Phẩm Giày Mới' : 'Chỉnh Sửa Sản Phẩm: ' + shoe.name}">Thêm Giày Mới</h3>
+                    <p class="text-muted small mb-0">Cập nhật thông tin chi tiết, hình ảnh và số lượng từng size tồn kho.</p>
+                </div>
+                <a th:href="@{/admin/shoes}" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+            </div>
+
+            <form th:action="@{/admin/shoes/save}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" th:value="${shoe.id}">
+
+                <div class="row g-4">
+                    <!-- CỘT TRÁI: THÔNG TIN CƠ BẢN & ẢNH -->
+                    <div class="col-lg-7">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                            <h5 class="fw-bold mb-3 pb-2 border-bottom">Thông Tin Chung</h5>
+
+                            <!-- Tên giày -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-secondary">Tên sản phẩm <span class="text-danger">*</span></label>
+                                <input type="text" name="name" th:value="${shoe.name}" 
+                                       class="form-control" placeholder="Ví dụ: Nike Air Force 1 '07..." required>
+                            </div>
+
+                            <!-- Hãng & Danh mục -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-secondary">Hãng sản xuất <span class="text-danger">*</span></label>
+                                    <input type="text" name="brand" th:value="${shoe.brand}" 
+                                           list="brandList" class="form-control" placeholder="Chọn hoặc nhập hãng..." required>
+                                    <datalist id="brandList">
+                                        <option th:each="b : ${brands}" th:value="${b}"></option>
+                                    </datalist>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-secondary">Danh mục giày <span class="text-danger">*</span></label>
+                                    <input type="text" name="category" th:value="${shoe.category}" 
+                                           list="categoryList" class="form-control" placeholder="Chọn hoặc nhập danh mục..." required>
+                                    <datalist id="categoryList">
+                                        <option th:each="c : ${categories}" th:value="${c}"></option>
+                                    </datalist>
+                                </div>
+                            </div>
+
+                            <!-- Đơn giá -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-secondary">Đơn giá bán (VNĐ) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="10000" name="price" th:value="${shoe.price}" 
+                                           class="form-control" placeholder="2500000" required>
+                                    <span class="input-group-text bg-light">VNĐ</span>
+                                </div>
+                            </div>
+
+                            <!-- Mô tả -->
+                            <div class="mb-0">
+                                <label class="form-label small fw-bold text-secondary">Mô tả sản phẩm</label>
+                                <textarea name="description" class="form-control" rows="4" 
+                                          placeholder="Giới thiệu tính năng, chất liệu, công nghệ của giày..." 
+                                          th:text="${shoe.description}"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Cấu hình hình ảnh -->
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                            <h5 class="fw-bold mb-3 pb-2 border-bottom">Hình Ảnh Sản Phẩm</h5>
+
+                            <div class="row g-3 align-items-center mb-3">
+                                <div class="col-sm-4 text-center">
+                                    <div class="p-2 border rounded-3 bg-light d-inline-block">
+                                        <img id="imagePreview" th:src="${shoe.imageUrl != null and !shoe.imageUrl.isEmpty() ? shoe.imageUrl : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'}" 
+                                             class="rounded-2" style="width: 130px; height: 130px; object-fit: cover;" alt="Preview"
+                                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400';">
+                                    </div>
+                                    <div class="text-muted small mt-1">Ảnh hiện tại / Xem trước</div>
+                                </div>
+
+                                <div class="col-sm-8">
+                                    <!-- 1. Tải ảnh từ máy tính -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-secondary">1. Tải lên tệp ảnh từ máy tính</label>
+                                        <input type="file" name="imageFile" id="imageFileInput" accept="image/*" class="form-control">
+                                        <div class="form-text small">Hỗ trợ JPG, PNG, WEBP (tối đa 10MB). Tự động lưu vào thư mục <code>uploads/</code>.</div>
+                                    </div>
+
+                                    <!-- 2. Hoặc nhập URL ảnh ngoài -->
+                                    <div>
+                                        <label class="form-label small fw-bold text-secondary">2. Hoặc dán đường dẫn URL ảnh trực tuyến</label>
+                                        <input type="url" name="imageUrl" id="imageUrlInput" th:value="${shoe.imageUrl}" 
+                                               class="form-control" placeholder="https://images.unsplash.com/...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: QUẢN LÝ BIẾN THỂ (SIZE / MÀU / KHO) -->
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 20px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <div>
+                                    <h5 class="fw-bold mb-0">Biến Thể Size & Kho</h5>
+                                    <small class="text-muted">Nhập các kích cỡ và số lượng tồn kho</small>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" id="btnAddVariant">
+                                    <i class="bi bi-plus-lg me-1"></i> + Thêm Size
+                                </button>
+                            </div>
+
+                            <div class="table-responsive mb-3" style="max-height: 380px; overflow-y: auto;">
+                                <table class="table table-bordered align-middle mb-0" id="variantTable">
+                                    <thead class="table-light small text-secondary">
+                                        <tr>
+                                            <th style="width: 80px;">Size</th>
+                                            <th>Màu sắc</th>
+                                            <th style="width: 100px;">Tồn kho</th>
+                                            <th style="width: 45px;" class="text-center"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variantTableBody">
+                                        <tr th:each="v : ${shoe.variants}">
+                                            <td>
+                                                <input type="text" name="variantSizes" th:value="${v.size}" 
+                                                       class="form-control form-control-sm text-center fw-bold" placeholder="40" required>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="variantColors" th:value="${v.color}" 
+                                                       class="form-control form-control-sm" placeholder="Trắng">
+                                            </td>
+                                            <td>
+                                                <input type="number" min="0" name="variantStocks" th:value="${v.stock}" 
+                                                       class="form-control form-control-sm text-center" placeholder="10" required>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-outline-danger btn-sm p-1 rounded-circle btn-remove-row" title="Xóa dòng">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="alert alert-info py-2 small mb-4">
+                                <i class="bi bi-lightbulb me-1"></i>
+                                Mẹo: Các size có <strong>tồn kho = 0</strong> sẽ hiển thị trạng thái "Hết hàng" và bị gạch ngang ở trang chi tiết sản phẩm.
+                            </div>
+
+                            <!-- Nút Lưu & Hủy -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-warning py-3 fw-bold text-dark rounded-3 shadow-sm fs-6">
+                                    <i class="bi bi-save2-fill me-1"></i> LƯU SẢN PHẨM
+                                </button>
+                                <a th:href="@{/admin/shoes}" class="btn btn-outline-secondary py-2 rounded-3">
+                                    Hủy bỏ
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- JavaScript thêm/xóa dòng biến thể và xem trước ảnh -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnAddVariant = document.getElementById('btnAddVariant');
+            const variantTableBody = document.getElementById('variantTableBody');
+            const imageFileInput = document.getElementById('imageFileInput');
+            const imageUrlInput = document.getElementById('imageUrlInput');
+            const imagePreview = document.getElementById('imagePreview');
+
+            // Xem trước ảnh khi chọn file
+            imageFileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // Xem trước ảnh khi dán link URL
+            imageUrlInput.addEventListener('input', function () {
+                if (this.value && this.value.trim().startsWith('http')) {
+                    imagePreview.src = this.value.trim();
+                }
+            });
+
+            // Thêm dòng biến thể mới
+            btnAddVariant.addEventListener('click', function () {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>
+                        <input type="text" name="variantSizes" class="form-control form-control-sm text-center fw-bold" placeholder="41" required>
+                    </td>
+                    <td>
+                        <input type="text" name="variantColors" class="form-control form-control-sm" placeholder="Mặc định">
+                    </td>
+                    <td>
+                        <input type="number" min="0" name="variantStocks" value="10" class="form-control form-control-sm text-center" placeholder="10" required>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-outline-danger btn-sm p-1 rounded-circle btn-remove-row" title="Xóa dòng">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </td>
+                `;
+                variantTableBody.appendChild(newRow);
+            });
+
+            // Xóa dòng biến thể
+            variantTableBody.addEventListener('click', function (e) {
+                const removeBtn = e.target.closest('.btn-remove-row');
+                if (removeBtn) {
+                    const row = removeBtn.closest('tr');
+                    if (variantTableBody.querySelectorAll('tr').length > 1) {
+                        row.remove();
+                    } else {
+                        alert('Sản phẩm cần tối thiểu 1 biến thể size!');
+                    }
+                }
+            });
+        });
+    </script>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

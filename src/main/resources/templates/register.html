@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Đăng Ký Tài Khoản - SneakPeak')}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Navbar -->
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <div class="container my-auto py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-6 col-xl-5">
+                <div class="auth-card p-4 p-sm-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-plus-fill text-warning display-5"></i>
+                        <h3 class="fw-bold mt-2">Tạo Tài Khoản</h3>
+                        <p class="text-muted small">Đăng ký thành viên SneakPeak để nhận nhiều ưu đãi</p>
+                    </div>
+
+                    <!-- Thông báo lỗi khi đăng ký -->
+                    <div th:if="${errorMessage != null}" class="alert alert-danger py-2 small d-flex align-items-center mb-3" role="alert">
+                        <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+                        <span th:text="${errorMessage}"></span>
+                    </div>
+
+                    <!-- Form Đăng Ký -->
+                    <form th:action="@{/register}" method="post">
+                        <!-- Họ và tên -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Họ và tên <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                <input type="text" name="fullName" th:value="${fullName}" class="form-control border-start-0" 
+                                       placeholder="Ví dụ: Nguyễn Văn A" required autofocus>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Địa chỉ Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                <input type="email" name="email" th:value="${email}" class="form-control border-start-0" 
+                                       placeholder="name@example.com" required>
+                            </div>
+                        </div>
+
+                        <!-- Số điện thoại & Địa chỉ -->
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-bold text-secondary">Số điện thoại</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+                                    <input type="tel" name="phone" th:value="${phone}" class="form-control border-start-0" 
+                                           placeholder="0912345678">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-bold text-secondary">Địa chỉ giao hàng</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt text-muted"></i></span>
+                                    <input type="text" name="address" th:value="${address}" class="form-control border-start-0" 
+                                           placeholder="Quận/Huyện, Tỉnh/TP">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Mật khẩu (tối thiểu 6 ký tự) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                <input type="password" name="password" minlength="6" class="form-control border-start-0" 
+                                       placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <!-- Xác nhận mật khẩu -->
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-secondary">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-lock text-muted"></i></span>
+                                <input type="password" name="confirmPassword" minlength="6" class="form-control border-start-0" 
+                                       placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <!-- Nút hoàn tất -->
+                        <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-dark rounded-3 shadow-sm mb-3">
+                            <i class="bi bi-check2-circle me-1"></i> ĐĂNG KÝ TÀI KHOẢN
+                        </button>
+
+                        <div class="text-center small text-muted">
+                            Đã có tài khoản? 
+                            <a th:href="@{/login}" class="fw-semibold text-decoration-none text-primary">Đăng nhập ngay</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
